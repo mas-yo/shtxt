@@ -4,10 +4,10 @@ using System.IO;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.Linq;
-using System.Reflection;
-using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
 
 using NPOI.XSSF.UserModel;
@@ -24,21 +24,35 @@ namespace MasterDataConverter
                 yield return enm.Current;
             }
         }
-        public static IEnumerable<IList<String>> GetRowDataEnumerable(this ISheet sheet)
+        public static IEnumerable<IDictionary<int, string>> GetRowDataEnumerable(this ISheet sheet)
         {
             var enm = sheet.GetRowEnumerator();
             while (enm.MoveNext())
             {
                 var row = (IRow)enm.Current;
-                var data = new List<String>();
+                var data = new Dictionary<int, string>();
                 foreach (var cell in row.Cells)
                 {
-                    while (data.Count < cell.ColumnIndex)
+                    switch (cell.CellType)
                     {
-                        data.Add("");
+                        case CellType.Numeric:
+                            data.Add(cell.ColumnIndex, cell.NumericCellValue.ToString());
+                            break;
+                        case CellType.String:
+                            data.Add(cell.ColumnIndex, cell.StringCellValue);
+                            break;
+                        case CellType.Formula:
+                            switch (cell.CachedFormulaResultType)
+                            {
+                                case CellType.Numeric:
+                                    data.Add(cell.ColumnIndex, cell.NumericCellValue.ToString());
+                                    break;
+                                case CellType.String:
+                                    data.Add(cell.ColumnIndex, cell.StringCellValue);
+                                    break;
+                            }
+                            break;
                     }
-
-                    data.Add(cell.ToString());
                 }
 
                 yield return data;
@@ -46,50 +60,59 @@ namespace MasterDataConverter
         }
     }
 
-    class TextFileInfo
-    {
-        public bool IsValid = false;
-        public string FileName = null;
-        public string Header = null;
-        public IList<string> DataLines = new List<string>();
-    }
+    // class TextFileInfo
+    // {
+    //     public bool IsValid = false;
+    //     public string FileName = null;
+    //     public string Header = null;
+    //     public IList<string> DataLines = new List<string>();
+    // }
 
     class Program
     {
-        static TextFileInfo ConvertToTextFileInfo(IEnumerable<IList<String>> rows)
+        // static TextFileInfo ConvertToTextFileInfo(IEnumerable<IList<String>> rows)
+        // {
+        //     var info = new TextFileInfo();
+        //     
+        //     foreach (var columns in rows)
+        //     {
+        //         if (columns.Count <= 0) continue;
+        //
+        //         var command = columns[0];
+        //         if (command.StartsWith("#")) continue;
+        //         
+        //         if (command == "[テーブル名]" && columns.Count >= 2)
+        //         {
+        //             info.FileName = columns[1];
+        //         }
+        //         else if (command == "[カラム名]")
+        //         {
+        //             info.Header = String.Join("\t", columns);
+        //         }
+        //         else
+        //         {
+        //             if (info.Header != null)
+        //             {
+        //                 info.DataLines.Add(String.Join("\t", columns));
+        //             }
+        //         }
+        //     }
+        //
+        //     if (!String.IsNullOrEmpty(info.FileName) && !string.IsNullOrEmpty(info.Header) && info.DataLines.Count > 0)
+        //     {
+        //         info.IsValid = true;
+        //     }
+        //
+        //     return info;
+        // }
+
+        static void WriteTsv(StreamWriter writer, MasterTableInfo info)
         {
-            var info = new TextFileInfo();
-            
-            foreach (var columns in rows)
+            writer.WriteLine(String.Join("\t", info.ColumnNames));
+            foreach (var row in info.Body)
             {
-                if (columns.Count <= 0) continue;
-
-                var command = columns[0];
-                if (command.StartsWith("#")) continue;
-                
-                if (command == "[テーブル名]" && columns.Count >= 2)
-                {
-                    info.FileName = columns[1];
-                }
-                else if (command == "[カラム名]")
-                {
-                    info.Header = String.Join("\t", columns);
-                }
-                else
-                {
-                    if (info.Header != null)
-                    {
-                        info.DataLines.Add(String.Join("\t", columns));
-                    }
-                }
+                writer.WriteLine(String.Join("\t", row.Data));
             }
-
-            if (!String.IsNullOrEmpty(info.FileName) && !string.IsNullOrEmpty(info.Header) && info.DataLines.Count > 0)
-            {
-                info.IsValid = true;
-            }
-
-            return info;
         }
 
         static void Convert(IList<string> inputPaths, string outputDir)
@@ -102,16 +125,12 @@ namespace MasterDataConverter
             {
                 return Task.Factory.StartNew(() =>
                 {
-                    var info = ConvertToTextFileInfo(sheet.GetRowDataEnumerable());
+                    var info = MasterTableInfo.Load(sheet.GetRowDataEnumerable());
                     if (info.IsValid)
                     {
-                        using (var writer = new StreamWriter(Path.Combine(outputDir, info.FileName)))
+                        using (var writer = new StreamWriter(Path.Combine(outputDir, info.Name + ".tsv"), false, Encoding.UTF8))
                         {
-                            writer.WriteLine(info.Header);
-                            foreach (var line in info.DataLines)
-                            {
-                                writer.WriteLine(line);
-                            }
+                            WriteTsv(writer, info); 
                         }
                     }
                 });
