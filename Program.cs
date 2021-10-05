@@ -60,52 +60,8 @@ namespace MasterDataConverter
         }
     }
 
-    // class TextFileInfo
-    // {
-    //     public bool IsValid = false;
-    //     public string FileName = null;
-    //     public string Header = null;
-    //     public IList<string> DataLines = new List<string>();
-    // }
-
     class Program
     {
-        // static TextFileInfo ConvertToTextFileInfo(IEnumerable<IList<String>> rows)
-        // {
-        //     var info = new TextFileInfo();
-        //     
-        //     foreach (var columns in rows)
-        //     {
-        //         if (columns.Count <= 0) continue;
-        //
-        //         var command = columns[0];
-        //         if (command.StartsWith("#")) continue;
-        //         
-        //         if (command == "[テーブル名]" && columns.Count >= 2)
-        //         {
-        //             info.FileName = columns[1];
-        //         }
-        //         else if (command == "[カラム名]")
-        //         {
-        //             info.Header = String.Join("\t", columns);
-        //         }
-        //         else
-        //         {
-        //             if (info.Header != null)
-        //             {
-        //                 info.DataLines.Add(String.Join("\t", columns));
-        //             }
-        //         }
-        //     }
-        //
-        //     if (!String.IsNullOrEmpty(info.FileName) && !string.IsNullOrEmpty(info.Header) && info.DataLines.Count > 0)
-        //     {
-        //         info.IsValid = true;
-        //     }
-        //
-        //     return info;
-        // }
-
         static void WriteTsv(StreamWriter writer, MasterTableInfo info)
         {
             writer.WriteLine(String.Join("\t", info.ColumnNames));
@@ -128,8 +84,9 @@ namespace MasterDataConverter
                     var info = MasterTableInfo.Load(sheet.GetRowDataEnumerable());
                     if (info.IsValid)
                     {
-                        using (var writer = new StreamWriter(Path.Combine(outputDir, info.Name + ".tsv"), false, Encoding.UTF8))
+                        using (var writer = new StreamWriter(Path.Combine(outputDir, info.Name + ".tsv")))
                         {
+                            writer.NewLine = "\n";
                             WriteTsv(writer, info); 
                         }
                     }
