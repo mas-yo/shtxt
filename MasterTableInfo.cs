@@ -10,17 +10,17 @@ namespace MasterDataConverter
 
     class BodyRowInfo
     {
-        public string Command {get;set;}
-        public IList<string> Data {get;set;}
+        public string Command { get; set; }
+        public IList<string> Data { get; set; }
     }
 
     class MasterTableInfo
     {
         const int COMMAND_COLUMN = 0;
 
-        public string Name{get; private set;}
+        public string Name { get; private set; }
         public IList<string> ColumnCommands;
-        public IList<string> ColumnNames{get; private set;}
+        public IList<string> ColumnNames { get; private set; }
         public IList<BodyRowInfo> Body { get; private set; } = new List<BodyRowInfo>();
 
         public static IList<string> GetDataList(IDictionary<int, string> dict)
@@ -52,17 +52,19 @@ namespace MasterDataConverter
         }
         public static MasterTableInfo Load(IEnumerable<IDictionary<ColumnIndex, string>> rows)
         {
-            
+
             var info = new MasterTableInfo();
 
             foreach (var columns in rows)
             {
-                if (columns.Count <= 0) continue;
+                if (columns.Count <= 0)
+                    continue;
 
                 if (columns.ContainsKey(COMMAND_COLUMN))
                 {
                     var command = columns[COMMAND_COLUMN];
-                    if (command.StartsWith("#")) continue;
+                    if (command.StartsWith("#"))
+                        continue;
 
                     if (command == "[テーブル名]" && columns.ContainsKey(COMMAND_COLUMN + 1))
                     {
@@ -77,11 +79,11 @@ namespace MasterDataConverter
                         info.ColumnCommands = GetDataList(columns);
                     }
                 }
-                
+
                 if (info.ColumnNames != null)
                 {
                     var row = new BodyRowInfo();
-                    if (columns.ContainsKey(COMMAND_COLUMN)) 
+                    if (columns.ContainsKey(COMMAND_COLUMN))
                     {
                         row.Command = columns[COMMAND_COLUMN];
                     }
@@ -110,12 +112,18 @@ namespace MasterDataConverter
 
         public bool IsValid
         {
-            get {
-                if (String.IsNullOrWhiteSpace(Name)) return false;
-                if (ColumnNames == null) return false;
-                if (ColumnNames.Count == 0) return false;
-                if (Body == null) return false;
-                if (ColumnNames.Any(c => String.IsNullOrWhiteSpace(c))) return false;
+            get
+            {
+                if (String.IsNullOrWhiteSpace(Name))
+                    return false;
+                if (ColumnNames == null)
+                    return false;
+                if (ColumnNames.Count == 0)
+                    return false;
+                if (Body == null)
+                    return false;
+                if (ColumnNames.Any(c => String.IsNullOrWhiteSpace(c)))
+                    return false;
                 return true;
             }
         }

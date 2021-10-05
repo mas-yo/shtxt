@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.IO;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+
 using NPOI.HSSF.UserModel;
 using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
-
 using NPOI.XSSF.UserModel;
 
 namespace MasterDataConverter
@@ -75,7 +75,7 @@ namespace MasterDataConverter
         {
             var tasks = inputPaths.SelectMany(path =>
             {
-                var book = WorkbookFactory.Create(path, password:null, readOnly:true);
+                var book = WorkbookFactory.Create(path, password: null, readOnly: true);
                 return book.GetSheetEnumerable();
             }).Select(sheet =>
             {
@@ -87,7 +87,7 @@ namespace MasterDataConverter
                         using (var writer = new StreamWriter(Path.Combine(outputDir, info.Name + ".tsv")))
                         {
                             writer.NewLine = "\n";
-                            WriteTsv(writer, info); 
+                            WriteTsv(writer, info);
                         }
                     }
                 });
