@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
+
+using NPOI.SS.Formula.Functions;
 
 
 namespace MasterDataConverter
@@ -8,104 +11,63 @@ namespace MasterDataConverter
     using ColumnIndex = Int32;
 
 
-    class BodyRowInfo
+
+    public class MasterTableInfo
     {
-        public string Command { get; set; }
-        public IList<string> Data { get; set; }
-    }
+        const int CONTROL_COLUMN = 0;
 
-    class MasterTableInfo
-    {
-        const int COMMAND_COLUMN = 0;
-
-        public string Name { get; private set; }
-        public IList<string> ColumnCommands;
-        public IList<string> ColumnNames { get; private set; }
-        public IList<BodyRowInfo> Body { get; private set; } = new List<BodyRowInfo>();
-
-        public static IList<string> GetDataList(IDictionary<int, string> dict)
+        public class HeaderInfo
         {
-            var list = new List<string>();
-            int max = dict.Keys.Max();
-            for (var i = COMMAND_COLUMN + 1; i <= max; i++)
+            public string Name { get; private set; }
+            public IReadOnlyCollection<string> ColumnCommands { get; private set; }
+            public IReadOnlyCollection<string> ColumnNames { get; private set; }
+
+            public HeaderInfo(string name, IReadOnlyCollection<string> columnCommands,
+                IReadOnlyCollection<string> columnNames)
             {
-                if (dict.ContainsKey(i))
-                {
-                    list.Add(dict[i]);
-                }
-                else
-                {
-                    list.Add("");
-                }
+                Name = name;
+                ColumnCommands = columnCommands;
+                ColumnNames = columnNames;
             }
 
-            return list;
-        }
-
-        public static void ExtendList(IList<string> list, int count)
-        {
-            int start = list.Count;
-            for (int i = start; i < count; i++)
+            public bool IsValid
             {
-                list.Add("");
+                get
+                {
+                    if (String.IsNullOrWhiteSpace(Name)) return false;
+                    if (ColumnNames == null) return false;
+                    if (ColumnNames.Count == 0) return false;
+                    if (ColumnNames.Any(c => String.IsNullOrWhiteSpace(c)))
+                        return false;
+                    return true;
+                }
             }
         }
-        public static MasterTableInfo Load(IEnumerable<IDictionary<ColumnIndex, string>> rows)
+        public class Row
         {
+            public string Control { get; set; }
+            public IReadOnlyCollection<string> Data { get; private set; }
 
-            var info = new MasterTableInfo();
-
-            foreach (var columns in rows)
+            public Row(string control, IReadOnlyCollection<string> data)
             {
-                if (columns.Count <= 0)
-                    continue;
-
-                if (columns.ContainsKey(COMMAND_COLUMN))
-                {
-                    var command = columns[COMMAND_COLUMN];
-                    if (command.StartsWith("#"))
-                        continue;
-
-                    if (command == "[テーブル名]" && columns.ContainsKey(COMMAND_COLUMN + 1))
-                    {
-                        info.Name = columns[COMMAND_COLUMN + 1];
-                    }
-                    else if (command == "[カラム名]")
-                    {
-                        info.ColumnNames = GetDataList(columns);
-                    }
-                    else if (command == "[カラム制御]")
-                    {
-                        info.ColumnCommands = GetDataList(columns);
-                    }
-                }
-
-                if (info.ColumnNames != null)
-                {
-                    var row = new BodyRowInfo();
-                    if (columns.ContainsKey(COMMAND_COLUMN))
-                    {
-                        row.Command = columns[COMMAND_COLUMN];
-                    }
-
-                    row.Data = GetDataList(columns);
-                    info.Body.Add(row);
-                }
+                Control = control;
+                Data = data;
             }
+        }
 
-            int max = info.CalcMaxColumnCount();
-            ExtendList(info.ColumnNames, max);
-            foreach (var row in info.Body)
-            {
-                ExtendList(row.Data, max);
-            }
 
-            return info;
+        public HeaderInfo Header { get; private set; }
+        public IReadOnlyList<Row> Body { get; private set; }
+
+        public MasterTableInfo(HeaderInfo header, IReadOnlyList<Row> body)
+        {
+            Header = header;
+            Body = body;
         }
 
         private int CalcMaxColumnCount()
         {
-            int columnMax = ColumnNames.Count;
+            int columnMax = Header.ColumnNames.Count;
             int bodyMax = Body.Max(r => r.Data.Count);
             return Math.Max(columnMax, bodyMax);
         }
@@ -114,15 +76,12 @@ namespace MasterDataConverter
         {
             get
             {
-                if (String.IsNullOrWhiteSpace(Name))
+                if (!Header.IsValid) 
                     return false;
-                if (ColumnNames == null)
-                    return false;
-                if (ColumnNames.Count == 0)
-                    return false;
+                
                 if (Body == null)
                     return false;
-                if (ColumnNames.Any(c => String.IsNullOrWhiteSpace(c)))
+                if (Body.Count == 0)
                     return false;
                 return true;
             }
