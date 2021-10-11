@@ -46,7 +46,7 @@ namespace Shtxt
                 default:
                     throw new Exception("unimplemented text format");
             }
-            
+
             using (var writer = new StreamWriter(Path.Combine(config.OutputDir, info.Header.Name + ext)))
             {
                 switch (config.NewLine)
@@ -89,15 +89,15 @@ namespace Shtxt
         {
             var command = new RootCommand();
             command.Add(new Argument<List<FileInfo>>("input-files"));
-            command.Add(new Option<string>(new string[]{"-o", "--output-dir"}, "output directory"));
-            command.Add(new Option<string>(new string[]{"-n", "--newline"}, "newline code(cr,lf,crlf)"));
-            command.Add(new Option<string>(new string[]{"-f", "--format"}, "output format(csv,tsv,json,yaml)"));
-            command.Add(new Option<string>(new string[]{"--comment-starts-with"}, "comment line letter"));
-            command.Add(new Option<string>(new string[]{"--table-name-tag"}, "table name tag"));
-            command.Add(new Option<string>(new string[]{"--column-name-tag"}, "column name tag"));
-            command.Add(new Option<string>(new string[]{"--column-control-tag"}, "column control tag"));
-            command.Add(new Option<string>(new string[]{"-c", "--config"}, "config file"));
-            
+            command.Add(new Option<string>(new string[] {"-o", "--output-dir"}, "output directory"));
+            command.Add(new Option<string>(new string[] {"-n", "--newline"}, "newline code(cr,lf,crlf)"));
+            command.Add(new Option<string>(new string[] {"-f", "--format"}, "output format(csv,tsv,json,yaml)"));
+            command.Add(new Option<string>(new string[] {"--comment-starts-with"}, "comment line letter"));
+            command.Add(new Option<string>(new string[] {"--table-name-tag"}, "table name tag"));
+            command.Add(new Option<string>(new string[] {"--column-name-tag"}, "column name tag"));
+            command.Add(new Option<string>(new string[] {"--column-control-tag"}, "column control tag"));
+            command.Add(new Option<string>(new string[] {"-c", "--config"}, "config file"));
+
 
             command.Handler = CommandHandler.Create((
                 List<FileInfo> inputFiles,
@@ -111,7 +111,7 @@ namespace Shtxt
                 string config) =>
             {
                 var cfg = new Config();
-                
+
                 // TODO overwrite configs
                 cfg.OutputDir = "../../../Output";
                 Convert(inputFiles.Select(f => f.FullName).ToList(), cfg);
@@ -121,5 +121,4 @@ namespace Shtxt
             Console.WriteLine("End");
         }
     }
-
 }
