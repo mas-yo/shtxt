@@ -3,6 +3,8 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
+    <AssemblyName>Shtxt</AssemblyName>
+    <RootNamespace>Shtxt</RootNamespace>
   </PropertyGroup>
 
   <ItemGroup>

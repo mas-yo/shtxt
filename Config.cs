@@ -6,7 +6,7 @@ using System.Text;
 
 using YamlDotNet.RepresentationModel;
 
-namespace MasterDataConverter
+namespace Shtxt
 {
     public enum NewLine
     {

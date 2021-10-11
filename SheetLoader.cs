@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace MasterDataConverter
+namespace Shtxt
 {
     using ColumnIndex = Int32;
     using RowEnumerator = IEnumerator<IDictionary<int, string>>;
     
-    public class MasterTableLoader
+    public class SheetLoader
     {
         const int CONTROL_COLUMN = 0;
 
@@ -37,14 +37,14 @@ namespace MasterDataConverter
         private string columnNameTag;
         private RowEnumerator rowEnumerator;
 
-        public MasterTableLoader(string tableNameTag, string columnCommandTag, string columnNameTag)
+        public SheetLoader(string tableNameTag, string columnCommandTag, string columnNameTag)
         {
             this.tableNameTag = tableNameTag;
             this.columnCommandTag = columnCommandTag;
             this.columnNameTag = columnNameTag;
         }
 
-        private MasterTableInfo.HeaderInfo LoadHeaderInfo()
+        private SheetInfo.HeaderInfo LoadHeaderInfo()
         {
             string tableName = null;
             List<string> columnCommands = null;
@@ -76,12 +76,12 @@ namespace MasterDataConverter
                 }
             }
 
-            return new MasterTableInfo.HeaderInfo(tableName, columnCommands, columnNames);
+            return new SheetInfo.HeaderInfo(tableName, columnCommands, columnNames);
         }
 
-        private IReadOnlyList<MasterTableInfo.Row> LoadBody()
+        private IReadOnlyList<SheetInfo.Row> LoadBody()
         {
-            var body = new List<MasterTableInfo.Row>();
+            var body = new List<SheetInfo.Row>();
             while(rowEnumerator.MoveNext())
             {
                 var columns = rowEnumerator.Current;
@@ -92,23 +92,23 @@ namespace MasterDataConverter
                     control = columns[CONTROL_COLUMN];
                 }
 
-                body.Add(new MasterTableInfo.Row(control, DictionaryToList(columns)));
+                body.Add(new SheetInfo.Row(control, DictionaryToList(columns)));
             }
 
             return body;
         }
         
-        public MasterTableInfo Load(IEnumerable<IDictionary<ColumnIndex, string>> rows)
+        public SheetInfo Load(IEnumerable<IDictionary<ColumnIndex, string>> rows)
         {
             rowEnumerator = rows.GetEnumerator();
             var header = LoadHeaderInfo();
             if (!header.IsValid)
             {
-                return new MasterTableInfo(header, null);
+                return new SheetInfo(header, null);
             }
 
             var body = LoadBody();
-            return new MasterTableInfo(header, body);
+            return new SheetInfo(header, body);
         }
     }
 }

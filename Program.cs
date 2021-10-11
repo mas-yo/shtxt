@@ -12,11 +12,11 @@ using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace MasterDataConverter
+namespace Shtxt
 {
     class Program
     {
-        static void WriteCsv(StreamWriter writer, MasterTableInfo info, string separator, Config config)
+        static void WriteCsv(StreamWriter writer, SheetInfo info, string separator, Config config)
         {
             writer.WriteLine(String.Join(separator, info.Header.ColumnNames));
             foreach (var row in info.Body)
@@ -26,7 +26,7 @@ namespace MasterDataConverter
             }
         }
 
-        static void WriteText(MasterTableInfo info, Config config)
+        static void WriteText(SheetInfo info, Config config)
         {
             if (!info.IsValid)
                 return;
@@ -76,7 +76,7 @@ namespace MasterDataConverter
             {
                 return Task.Factory.StartNew(() =>
                 {
-                    var loader = new MasterTableLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag);
+                    var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag);
                     var info = loader.Load(sheet.GetRowDataEnumerable());
                     WriteText(info, config);
                 });

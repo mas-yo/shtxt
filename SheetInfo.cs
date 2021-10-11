@@ -6,13 +6,13 @@ using System.Reflection.Metadata.Ecma335;
 using NPOI.SS.Formula.Functions;
 
 
-namespace MasterDataConverter
+namespace Shtxt
 {
     using ColumnIndex = Int32;
 
 
 
-    public class MasterTableInfo
+    public class SheetInfo
     {
         const int CONTROL_COLUMN = 0;
 
@@ -59,7 +59,7 @@ namespace MasterDataConverter
         public HeaderInfo Header { get; private set; }
         public IReadOnlyList<Row> Body { get; private set; }
 
-        public MasterTableInfo(HeaderInfo header, IReadOnlyList<Row> body)
+        public SheetInfo(HeaderInfo header, IReadOnlyList<Row> body)
         {
             Header = header;
             Body = body;
