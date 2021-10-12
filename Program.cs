@@ -116,7 +116,7 @@ namespace Shtxt
 
                     if (config != null && config.Exists)
                     {
-                        cfg.LoadFromFile(config.FullName);
+                        cfg = Config.LoadFromFile(config.FullName);
                     }
                     else
                     {
@@ -124,7 +124,7 @@ namespace Shtxt
                         {
                             if (File.Exists(file))
                             {
-                                cfg.LoadFromFile(file);
+                                cfg = Config.LoadFromFile(file);
                                 break;
                             }
                         }
