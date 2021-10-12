@@ -6,7 +6,7 @@ using System.Text;
 
 using YamlDotNet.RepresentationModel;
 
-namespace MasterDataConverter
+namespace Shtxt
 {
     public enum NewLine
     {
@@ -26,7 +26,21 @@ namespace MasterDataConverter
     {
         public string OutputDir { get; set; } = ".";
         public NewLine NewLine { get; set; } = NewLine.LF;
+
+        public void SetNewLine(string str)
+        {
+            NewLine l = NewLine.LF;
+            NewLine.TryParse(str, true, out l);
+            this.NewLine = l;
+        }
         public TextFormat TextFormat { get; set; } = TextFormat.Tsv;
+
+        public void SetTextFormat(string str)
+        {
+            TextFormat t;
+            TextFormat.TryParse(str, true, out t);
+            this.TextFormat = t;
+        }
         public string CommentStartsWith { get; set; } = "#";
         public string TableNameTag { get; set; } = "[テーブル名]";
         public string ColumnControlTag { get; set; } = "[カラム制御]";
@@ -51,14 +65,10 @@ namespace MasterDataConverter
                                     OutputDir = child.Value.ToString();
                                 break;
                                 case "NewLine":
-                                    NewLine l = NewLine.LF;
-                                    NewLine.TryParse(child.Value.ToString(), true, out l);
-                                    this.NewLine = l;
+                                    SetNewLine(child.Value.ToString());
                                     break;
                                 case "TextFormat":
-                                    TextFormat t;
-                                    TextFormat.TryParse(child.Value.ToString(), true, out t);
-                                    this.TextFormat = t;
+                                    SetTextFormat(child.Value.ToString());
                                     break;
                                 case "CommentStartsWith":
                                     CommentStartsWith = child.Value.ToString();

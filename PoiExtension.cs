@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using NPOI.SS.UserModel;
 
-namespace MasterDataConverter
+namespace Shtxt
 {
     public static class PoiExtension
     {
