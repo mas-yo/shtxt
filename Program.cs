@@ -96,7 +96,7 @@ namespace Shtxt
             command.Add(new Option<string>(new string[] {"--table-name-tag"}, "table name tag"));
             command.Add(new Option<string>(new string[] {"--column-name-tag"}, "column name tag"));
             command.Add(new Option<string>(new string[] {"--column-control-tag"}, "column control tag"));
-            command.Add(new Option<string>(new string[] {"-c", "--config"}, "config file"));
+            command.Add(new Option<FileInfo>(new string[] {"-c", "--config"}, "config file"));
 
 
             command.Handler = CommandHandler.Create((
@@ -108,15 +108,46 @@ namespace Shtxt
                 string tableNameTag,
                 string columnNameTag,
                 string columnControlTag,
-                string config) =>
-            {
-                var cfg = new Config();
+                FileInfo config) =>
+                {
+                    var cfg = new Config();
 
-                // TODO overwrite configs
-                cfg.OutputDir = "../../../Output";
-                Convert(inputFiles.Select(f => f.FullName).ToList(), cfg);
-            });
+                    var configFileList = new List<String>() {"config.yml","config.yaml", "Config.yml", "Config.yaml"};
 
+                    if (config != null && config.Exists)
+                    {
+                        cfg.LoadFromFile(config.FullName);
+                    }
+                    else
+                    {
+                        foreach (var file in configFileList)
+                        {
+                            if (File.Exists(file))
+                            {
+                                cfg.LoadFromFile(file);
+                                break;
+                            }
+                        }
+                    }
+                    
+                    if (!String.IsNullOrEmpty(outputDir))
+                        cfg.OutputDir = outputDir;
+                    if (!String.IsNullOrEmpty(newline))
+                        cfg.SetNewLine(newline);
+                    if (!String.IsNullOrEmpty(format))
+                        cfg.SetTextFormat(format);
+                    if (!String.IsNullOrEmpty(commentStartsWith))
+                        cfg.CommentStartsWith = commentStartsWith;
+                    if (!String.IsNullOrEmpty(tableNameTag))
+                        cfg.TableNameTag = tableNameTag;
+                    if (!String.IsNullOrEmpty(columnNameTag))
+                        cfg.ColumnNameTag = columnNameTag;
+                    if (!String.IsNullOrEmpty(columnControlTag))
+                        cfg.ColumnControlTag = columnControlTag;
+                    
+                    Convert(inputFiles.Select(f => f.FullName).ToList(), cfg);
+                });
+            
             command.Invoke(args);
             Console.WriteLine("End");
         }
