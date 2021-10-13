@@ -8,14 +8,14 @@ using YamlDotNet.Serialization;
 
 namespace Shtxt
 {
-    public enum NewLine
+    public enum NewLineType
     {
         LF,
         CR,
         CRLF,
     }
 
-    public enum TextFormat
+    public enum TextFormatType
     {
         Csv,
         Tsv,
@@ -28,20 +28,18 @@ namespace Shtxt
         public string OutputDir { get; set; } = ".";
         public string NewLine { get; set; } = "LF";
 
-        // public void SetNewLine(string str)
-        // {
-        //     NewLine l = NewLine.LF;
-        //     NewLine.TryParse(str, true, out l);
-        //     this.NewLine = l;
-        // }
+        public NewLineType NewLineType
+        {
+            get => Enum.Parse<NewLineType>(NewLine);
+        }
+
         public string TextFormat { get; set; } = "tsv";
 
-        // public void SetTextFormat(string str)
-        // {
-        //     TextFormat t;
-        //     TextFormat.TryParse(str, true, out t);
-        //     this.TextFormat = t;
-        // }
+        public TextFormatType TextFormatType
+        {
+            get => Enum.Parse<TextFormatType>(TextFormat);
+        }
+
         public string CommentStartsWith { get; set; } = "#";
         public string TableNameTag { get; set; } = "[テーブル名]";
         public string ColumnControlTag { get; set; } = "[カラム制御]";

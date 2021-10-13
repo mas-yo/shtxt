@@ -34,13 +34,13 @@ namespace Shtxt
 
             var ext = "";
             var separator = "";
-            switch (config.TextFormat)
+            switch (config.TextFormatType)
             {
-                case "csv":
+                case TextFormatType.Csv:
                     ext = ".csv";
                     separator = ",";
                     break;
-                case "tsv":
+                case TextFormatType.Tsv:
                     ext = ".tsv";
                     separator = "\t";
                     break;
@@ -50,15 +50,15 @@ namespace Shtxt
 
             using (var writer = new StreamWriter(Path.Combine(config.OutputDir, info.Header.Name + ext)))
             {
-                switch (config.NewLine)
+                switch (config.NewLineType)
                 {
-                    case "CR":
+                    case NewLineType.CR:
                         writer.NewLine = "\r";
                         break;
-                    case "LF":
+                    case NewLineType.LF:
                         writer.NewLine = "\n";
                         break;
-                    case "CRLF":
+                    case NewLineType.CRLF:
                         writer.NewLine = "\r\n";
                         break;
                 }
