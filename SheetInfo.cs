@@ -6,7 +6,7 @@ using System.Reflection.Metadata.Ecma335;
 using NPOI.SS.Formula.Functions;
 
 
-namespace Shtxt
+namespace shtxt
 {
     using ColumnIndex = Int32;
 

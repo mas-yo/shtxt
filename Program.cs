@@ -13,7 +13,7 @@ using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
-namespace Shtxt
+namespace shtxt
 {
     class Program
     {

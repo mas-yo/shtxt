@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 
-namespace Shtxt
+namespace shtxt
 {
     using ColumnIndex = Int32;
     using RowEnumerator = IEnumerator<IDictionary<int, string>>;

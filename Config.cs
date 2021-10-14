@@ -6,7 +6,7 @@ using System.Text;
 using YamlDotNet.RepresentationModel;
 using YamlDotNet.Serialization;
 
-namespace Shtxt
+namespace shtxt
 {
     public enum NewLineType
     {

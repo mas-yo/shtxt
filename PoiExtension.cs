@@ -2,7 +2,7 @@ using System.Collections.Generic;
 
 using NPOI.SS.UserModel;
 
-namespace Shtxt
+namespace shtxt
 {
     public static class PoiExtension
     {
