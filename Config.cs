@@ -41,9 +41,9 @@ namespace shtxt
         }
 
         public string CommentStartsWith { get; set; } = "#";
-        public string TableNameTag { get; set; } = "[テーブル名]";
-        public string ColumnControlTag { get; set; } = "[カラム制御]";
-        public string ColumnNameTag { get; set; } = "[カラム名]";
+        public string TableNameTag { get; set; } = "[NAME]";
+        public string ColumnControlTag { get; set; } = "[CONTROL]";
+        public string ColumnNameTag { get; set; } = "[COLUMN]";
         
         public FileInfo ConfigFile { get; set; }
 
