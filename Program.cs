@@ -6,6 +6,7 @@ using System.CommandLine.Parsing;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 using NPOI.HSSF.UserModel;
@@ -66,18 +67,20 @@ namespace shtxt
                 WriteCsv(writer, info, separator, config);
             }
         }
-
+        
         static void Convert(Config config)
         {
+            var regex = new Regex(config.InputFilePattern);
+            
             var tasks = config.InputFiles.SelectMany(info =>
             {
                 if ((info.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                 {
-                    return Directory.GetFiles(info.FullName, "*.xlsx", SearchOption.AllDirectories);
+                    return Directory.GetFiles(info.FullName, "*", SearchOption.AllDirectories).Where(path => regex.IsMatch(path));
                 }
                 else
                 {
-                    if (info.FullName.EndsWith(".xlsx"))
+                    if (regex.IsMatch(info.FullName))
                     {
                         return new string[] {info.FullName};
                     }

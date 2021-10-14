@@ -25,6 +25,7 @@ namespace shtxt
     public class Config
     {
         public List<DirectoryInfo> InputFiles { get; set; }
+        public string InputFilePattern { get; set; } = "";
         public string OutputDir { get; set; } = ".";
         public string NewLine { get; set; } = "LF";
 
