@@ -9,22 +9,66 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
+using ICSharpCode.SharpZipLib.Core;
+
 using NPOI.HSSF.UserModel;
 using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
+using Org.BouncyCastle.Asn1;
+
 namespace shtxt
 {
     class Program
     {
+        static bool CheckVersion(string control, IList<string> versionList, string currentVersion)
+        {
+            if (String.IsNullOrEmpty(control)) return true;
+            
+            var currentIndex = versionList.IndexOf(currentVersion);
+            if (currentIndex < 0) return true;
+
+            var checkFuncs = new List<(string, Func<int, int, bool>)>()
+            {
+                ("<=|", (int current, int check) => current <= check),
+                ("<|", (int current, int check) => current < check),
+                (">=|", (int current, int check) => current >= check),
+                (">|", (int current, int check) => current > check),
+                ("=|", (int current, int check) => current == check),
+                ("!=|", (int current, int check) => current != check),
+            };
+
+            foreach (var checkFunc in checkFuncs)
+            {
+                if (control.StartsWith(checkFunc.Item1))
+                {
+                    var checkVersion = control.Substring(checkFunc.Item1.Length);
+                    var checkIndex = versionList.IndexOf(checkVersion);
+                    if (checkIndex < 0) return false;
+                    return checkFunc.Item2(currentIndex, checkIndex);
+                }
+            }
+
+            return true;
+        }
         static void WriteCsv(StreamWriter writer, SheetInfo info, string separator, Config config)
         {
+            var versionList = new List<string>();
+            if (File.Exists(config.VersionList.FullName))
+            {
+                versionList = File.ReadLines(config.VersionList.FullName).ToList();
+            }
+            
             writer.WriteLine(String.Join(separator, info.Header.ColumnNames));
             foreach (var row in info.Body)
             {
                 if (row.Control != null && row.Control.StartsWith(config.CommentStartsWith)) continue;
-                writer.WriteLine(String.Join(separator, row.Data));
+
+                if (CheckVersion(row.Control, versionList, config.CurrentVersion))
+                {
+                    writer.WriteLine(String.Join(separator, row.Data));
+                }
             }
         }
 
@@ -70,7 +114,7 @@ namespace shtxt
         
         static void Convert(Config config)
         {
-            var regex = new Regex(config.InputFilePattern);
+            var regex = new Regex(config.InputPattern);
             
             var tasks = config.InputFiles.SelectMany(info =>
             {
@@ -107,6 +151,9 @@ namespace shtxt
         {
             var command = new RootCommand();
             command.Add(new Argument<List<DirectoryInfo>>("input-files"));
+            command.Add(new Option<string>(new string[] {"-p", "--input-pattern"}, "input file pattern"));
+            command.Add(new Option<FileInfo>(new string[] {"-l", "--version-list"}, "output version list"));
+            command.Add(new Option<string>(new string[] {"-r", "--current-version"}, "output current version"));
             command.Add(new Option<string>(new string[] {"-o", "--output-dir"}, "output directory"));
             command.Add(new Option<string>(new string[] {"-n", "--newline"}, "newline code(cr,lf,crlf)"));
             command.Add(new Option<string>(new string[] {"-f", "--text-format"}, "output format(csv,tsv,json,yaml)"));

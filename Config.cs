@@ -25,20 +25,24 @@ namespace shtxt
     public class Config
     {
         public List<DirectoryInfo> InputFiles { get; set; }
-        public string InputFilePattern { get; set; } = "";
+        public string InputPattern { get; set; } = "";
+
+        public FileInfo VersionList { get; set; } = new FileInfo("versions.txt");
+        
+        public string CurrentVersion { get; set; }
         public string OutputDir { get; set; } = ".";
         public string NewLine { get; set; } = "LF";
 
         public NewLineType NewLineType
         {
-            get => Enum.Parse<NewLineType>(NewLine);
+            get => Enum.Parse<NewLineType>(NewLine, true);
         }
 
         public string TextFormat { get; set; } = "tsv";
 
         public TextFormatType TextFormatType
         {
-            get => Enum.Parse<TextFormatType>(TextFormat);
+            get => Enum.Parse<TextFormatType>(TextFormat, true);
         }
 
         public string CommentStartsWith { get; set; } = "#";

@@ -1,2 +1,3 @@
 OutputDir: ./Output
 InputFiles: /Users/myoshida/dev/shtxt/config.yml test1.xlsx excel
+InputPattern: \.xlsx
