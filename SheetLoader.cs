@@ -35,13 +35,15 @@ namespace shtxt
         private string tableNameTag;
         private string columnCommandTag;
         private string columnNameTag;
+        private ControlParser controlParser;
         private RowEnumerator rowEnumerator;
 
-        public SheetLoader(string tableNameTag, string columnCommandTag, string columnNameTag)
+        public SheetLoader(string tableNameTag, string columnCommandTag, string columnNameTag, ControlParser controlParser)
         {
             this.tableNameTag = tableNameTag;
             this.columnCommandTag = columnCommandTag;
             this.columnNameTag = columnNameTag;
+            this.controlParser = controlParser;
         }
 
         private SheetInfo.HeaderInfo LoadHeaderInfo()
@@ -76,7 +78,7 @@ namespace shtxt
                 }
             }
 
-            return new SheetInfo.HeaderInfo(tableName, columnCommands, columnNames);
+            return new SheetInfo.HeaderInfo(tableName, columnCommands.Select(c => controlParser.Parse(c)).ToList() , columnNames);
         }
 
         private IReadOnlyList<SheetInfo.Row> LoadBody()
@@ -92,7 +94,7 @@ namespace shtxt
                     control = columns[CONTROL_COLUMN];
                 }
 
-                body.Add(new SheetInfo.Row(control, DictionaryToList(columns)));
+                body.Add(new SheetInfo.Row(controlParser.Parse(control), DictionaryToList(columns)));
             }
 
             return body;

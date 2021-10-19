@@ -8,67 +8,85 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Threading.Tasks.Dataflow;
 
 using ICSharpCode.SharpZipLib.Core;
 
+using NPOI.HSSF.Record;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.Formula;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 
 using Org.BouncyCastle.Asn1;
+using Org.BouncyCastle.Cms;
 
 namespace shtxt
 {
     class Program
     {
-        static bool CheckVersion(string control, IList<string> versionList, string currentVersion)
+        static bool IsEnable(Control control, string currentVersion, IList<string> versionList)
         {
-            if (String.IsNullOrEmpty(control)) return true;
-            
-            var currentIndex = versionList.IndexOf(currentVersion);
-            if (currentIndex < 0) return true;
-
-            var checkFuncs = new List<(string, Func<int, int, bool>)>()
+            switch (control)
             {
-                ("<=|", (int current, int check) => current <= check),
-                ("<|", (int current, int check) => current < check),
-                (">=|", (int current, int check) => current >= check),
-                (">|", (int current, int check) => current > check),
-                ("=|", (int current, int check) => current == check),
-                ("!=|", (int current, int check) => current != check),
-            };
+                case None:
+                    return true;
+                case Comment:
+                    return false;
+                    
+                case Version(var comp, var version):
+                    var currentIndex = versionList.IndexOf(currentVersion);
+                    if (currentIndex < 0) return true;
+                    var checkIndex = versionList.IndexOf(version);
+                    switch (comp)
+                    {
+                        case Compairator.Less:
+                            return currentIndex < checkIndex;
+                        case Compairator.LessOrEqual:
+                            return currentIndex <= checkIndex;
+                        case Compairator.Greater:
+                            return currentIndex > checkIndex;
+                        case Compairator.GreaterOrEqual:
+                            return currentIndex >= checkIndex;
+                        case Compairator.Equal:
+                            return currentIndex == checkIndex;
+                        case Compairator.NotEqual:
+                            return currentIndex != checkIndex;
+                    }
 
-            foreach (var checkFunc in checkFuncs)
-            {
-                if (control.StartsWith(checkFunc.Item1))
-                {
-                    var checkVersion = control.Substring(checkFunc.Item1.Length);
-                    var checkIndex = versionList.IndexOf(checkVersion);
-                    if (checkIndex < 0) return false;
-                    return checkFunc.Item2(currentIndex, checkIndex);
-                }
+                    return true;
             }
-
             return true;
         }
-        static void WriteCsv(StreamWriter writer, SheetInfo info, string separator, Config config)
+        static void WriteCsv(StreamWriter writer, SheetInfo info, string separator, IList<string> versionList, string currentVersion)
         {
-            var versionList = new List<string>();
-            if (File.Exists(config.VersionList.FullName))
+            var lines = GetRowEnumerable(info, versionList, currentVersion).Select(data => String.Join(separator, data));
+            foreach (var line in lines)
             {
-                versionList = File.ReadLines(config.VersionList.FullName).ToList();
+                writer.WriteLine(line);
             }
-            
-            writer.WriteLine(String.Join(separator, info.Header.ColumnNames));
+        }
+        
+        static IEnumerable<IReadOnlyCollection<string>> GetRowEnumerable(SheetInfo info, IList<string> versionList, string currentVersion)
+        {
+            var columnInfos = info.GetEnumerableColumnInfo();
+            var skipColumns = columnInfos
+                .Select((columnInfo, idx) => (idx, IsEnable(columnInfo.Control, currentVersion, versionList)))
+                .Where(i => i.Item2 == false)
+                .Select(i => i.idx)
+                .ToList();
+
+            yield return columnInfos
+                .Where((ci, idx) => !skipColumns.Contains(idx))
+                .Select(ci => ci.Name)
+                .ToList().AsReadOnly();
+
             foreach (var row in info.Body)
             {
-                if (row.Control != null && row.Control.StartsWith(config.CommentStartsWith)) continue;
-
-                if (CheckVersion(row.Control, versionList, config.CurrentVersion))
-                {
-                    writer.WriteLine(String.Join(separator, row.Data));
-                }
+                yield return row.Data
+                    .Where((data, idx) => !skipColumns.Contains(idx))
+                    .ToList()
+                    .AsReadOnly();
             }
         }
 
@@ -76,6 +94,12 @@ namespace shtxt
         {
             if (!info.IsValid)
                 return;
+
+            var versionList = new List<string>();
+            if (File.Exists(config.VersionList.FullName))
+            {
+                versionList = File.ReadLines(config.VersionList.FullName).ToList();
+            }
 
             var ext = "";
             var separator = "";
@@ -108,7 +132,7 @@ namespace shtxt
                         break;
                 }
 
-                WriteCsv(writer, info, separator, config);
+                WriteCsv(writer, info, separator, versionList, config.CurrentVersion);
             }
         }
         
@@ -138,7 +162,8 @@ namespace shtxt
             {
                 return Task.Factory.StartNew(() =>
                 {
-                    var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag);
+                    var controlParser = new ControlParser() { CommentStartsWith = config.CommentStartsWith };
+                    var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag, controlParser);
                     var info = loader.Load(sheet.GetRowDataEnumerable());
                     WriteText(info, config);
                 });
