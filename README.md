@@ -4,6 +4,8 @@
 
 Shtxt is flexible, extensible, configurable spread-sheet-to-text converter.
 
+![shtxt-1](docs/images/shtxt-1.png)
+
 ```
 Usage:
   shtxt [options] [<input-files>...]
