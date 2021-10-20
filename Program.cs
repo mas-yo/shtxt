@@ -65,121 +65,14 @@ namespace shtxt
             {
                 return Task.Factory.StartNew(() =>
                 {
-                    var controlParser = new ControlParser() { CommentStartsWith = config.CommentStartsWith };
-                    var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag, controlParser);
-                    var info = loader.Load(sheet.GetRowDataEnumerable());
-                    if (!info.IsValid) return;
-                    
-                    var versionList = new List<string>();
-                    if (File.Exists(config.VersionList.FullName))
-                    {
-                        versionList = File.ReadLines(config.VersionList.FullName).ToList();
-                    }
-                    var outputs = GetOutputRowEnumerable(info, versionList, config.CurrentVersion);
-                    WriteText(info.Header.Name, outputs, config);
+                    (var name, var outputs) = Converter.Convert(sheet, config);
+                    if (String.IsNullOrEmpty(name)) return;
+                    TextWriter.Write(name, outputs, config);
                 });
             });
 
             Task.WaitAll(tasks.ToArray());
         }
-        static void WriteText(string name, IEnumerable<IReadOnlyCollection<string>> outputs, Config config)
-        {
-            var ext = "";
-            var separator = "";
-            switch (config.TextFormatType)
-            {
-                case TextFormatType.Csv:
-                    ext = ".csv";
-                    separator = ",";
-                    break;
-                case TextFormatType.Tsv:
-                    ext = ".tsv";
-                    separator = "\t";
-                    break;
-                default:
-                    throw new Exception("unimplemented text format");
-            }
-
-            using (var writer = new StreamWriter(Path.Combine(config.OutputDir, name + ext)))
-            {
-                switch (config.NewLineType)
-                {
-                    case NewLineType.CR:
-                        writer.NewLine = "\r";
-                        break;
-                    case NewLineType.LF:
-                        writer.NewLine = "\n";
-                        break;
-                    case NewLineType.CRLF:
-                        writer.NewLine = "\r\n";
-                        break;
-                }
-
-                var lines = outputs.Select(data => String.Join(separator, data));
-                foreach (var line in lines)
-                {
-                    writer.WriteLine(line);
-                }
-            }
-        }
         
-        static IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info, IList<string> versionList, string currentVersion)
-        {
-            var columnInfos = info.GetEnumerableColumnInfo();
-            var skipColumns = columnInfos
-                .Select((columnInfo, idx) => (idx, IsEnable(columnInfo.Control, currentVersion, versionList)))
-                .Where(i => i.Item2 == false)
-                .Select(i => i.idx)
-                .ToList();
-
-            yield return columnInfos
-                .Where((ci, idx) => !skipColumns.Contains(idx))
-                .Select(ci => ci.Name)
-                .ToList().AsReadOnly();
-
-            foreach (var row in info.Body)
-            {
-                if (!IsEnable(row.Control, currentVersion, versionList)) continue;
-                
-                yield return row.Data
-                    .Where((data, idx) => !skipColumns.Contains(idx))
-                    .ToList()
-                    .AsReadOnly();
-            }
-        }
-
-        static bool IsEnable(Control control, string currentVersion, IList<string> versionList)
-        {
-            switch (control)
-            {
-                case None:
-                    return true;
-                case Comment:
-                    return false;
-                    
-                case Version(var comp, var version):
-                    var currentIndex = versionList.IndexOf(currentVersion);
-                    if (currentIndex < 0) return true;
-                    var checkIndex = versionList.IndexOf(version);
-                    switch (comp)
-                    {
-                        case Compairator.Less:
-                            return currentIndex < checkIndex;
-                        case Compairator.LessOrEqual:
-                            return currentIndex <= checkIndex;
-                        case Compairator.Greater:
-                            return currentIndex > checkIndex;
-                        case Compairator.GreaterOrEqual:
-                            return currentIndex >= checkIndex;
-                        case Compairator.Equal:
-                            return currentIndex == checkIndex;
-                        case Compairator.NotEqual:
-                            return currentIndex != checkIndex;
-                    }
-
-                    return true;
-            }
-            return true;
-        }
     }
 }
