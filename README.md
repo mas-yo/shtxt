@@ -4,7 +4,22 @@
 
 Shtxt is flexible, extensible, configurable spread-sheet-to-text converter.
 
+### Source spread sheet:
+
 ![shtxt-1](docs/images/shtxt-1.png)
+
+### Output text:
+
+```
+Id	Name	MaxHp	SkillId
+1001	Athena	100	101
+1002	Ikaros	130	102
+1003	Orion	210	103
+1004	Cratos	150	104
+1005	Zeus	350	105
+```
+
+### Usage
 
 ```
 Usage:
@@ -58,7 +73,7 @@ Shtxtは、柔軟性、拡張性、設定性に優れた、スプレッドシー
 引数
   <input-files>（入力ファイル
 
-オプションです。
+オプション
   -p, --input-pattern <input-pattern>          入力ファイル名のパターン
   -l, --version-list <version-list>            バージョンリストファイル
   -r, --current-version <current-version>      現在のバージョン
