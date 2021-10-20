@@ -86,5 +86,3 @@ Shtxtは、柔軟性、拡張性、設定性に優れた、スプレッドシー
 
 - XSSFWorkbook (別名.xlsxファイル)をサポートしています。
 
-
-www.DeepL.com/Translator（無料版）で翻訳しました。
