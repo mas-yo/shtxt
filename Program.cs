@@ -83,6 +83,8 @@ namespace shtxt
 
             foreach (var row in info.Body)
             {
+                if (!IsEnable(row.Control, currentVersion, versionList)) continue;
+                
                 yield return row.Data
                     .Where((data, idx) => !skipColumns.Contains(idx))
                     .ToList()

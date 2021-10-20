@@ -78,7 +78,9 @@ namespace shtxt
                 }
             }
 
-            return new SheetInfo.HeaderInfo(tableName, columnCommands.Select(c => controlParser.Parse(c)).ToList() , columnNames);
+            var controls = columnCommands != null ? columnCommands.Select(c => controlParser.Parse(c)).ToList() : null;
+
+            return new SheetInfo.HeaderInfo(tableName, controls, columnNames);
         }
 
         private IReadOnlyList<SheetInfo.Row> LoadBody()

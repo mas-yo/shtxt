@@ -1,5 +1,6 @@
 // unset
 
+using System;
 using System.Collections.Generic;
 using System.Reflection.Metadata.Ecma335;
 
@@ -38,6 +39,8 @@ namespace shtxt
         public string CommentStartsWith { get; set; } = "";
         public Control Parse(string s)
         {
+            if (String.IsNullOrEmpty(s)) return new None();
+            
             if (s.StartsWith(CommentStartsWith))
             {
                 return new Comment();
