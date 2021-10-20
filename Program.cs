@@ -17,17 +17,17 @@ namespace shtxt
         {
             var command = new RootCommand();
             command.Add(new Argument<List<DirectoryInfo>>("input-files"));
-            command.Add(new Option<string>(new string[] {"-p", "--input-pattern"}, "input file pattern"));
-            command.Add(new Option<FileInfo>(new string[] {"-l", "--version-list"}, "output version list"));
-            command.Add(new Option<string>(new string[] {"-r", "--current-version"}, "output current version"));
-            command.Add(new Option<string>(new string[] {"-o", "--output-dir"}, "output directory"));
-            command.Add(new Option<string>(new string[] {"-n", "--newline"}, "newline code(cr,lf,crlf)"));
-            command.Add(new Option<string>(new string[] {"-f", "--text-format"}, "output format(csv,tsv,json,yaml)"));
-            command.Add(new Option<string>(new string[] {"--comment-starts-with"}, "comment line letter"));
-            command.Add(new Option<string>(new string[] {"--table-name-tag"}, "table name tag"));
-            command.Add(new Option<string>(new string[] {"--column-name-tag"}, "column name tag"));
-            command.Add(new Option<string>(new string[] {"--column-control-tag"}, "column control tag"));
-            command.Add(new Option<FileInfo>(new string[] {"-c", "--config-file"}, "config file"));
+            command.Add(new Option<string>(new string[] {"-p", "--input-pattern"}, "Input file name pattern"));
+            command.Add(new Option<FileInfo>(new string[] {"-l", "--version-list"}, "Version list file"));
+            command.Add(new Option<string>(new string[] {"-r", "--current-version"}, "Current version"));
+            command.Add(new Option<string>(new string[] {"-o", "--output-dir"}, "Output directory"));
+            command.Add(new Option<string>(new string[] {"-n", "--newline"}, "Newline code(cr,lf,crlf)"));
+            command.Add(new Option<string>(new string[] {"-f", "--text-format"}, "Output format(csv,tsv)"));
+            command.Add(new Option<string>(new string[] {"--comment-starts-with"}, "String that indicates comment"));
+            command.Add(new Option<string>(new string[] {"--table-name-tag"}, "Tag string for table name"));
+            command.Add(new Option<string>(new string[] {"--column-name-tag"}, "Tag string for column name"));
+            command.Add(new Option<string>(new string[] {"--column-control-tag"}, "Tag string for column control"));
+            command.Add(new Option<FileInfo>(new string[] {"-c", "--config-file"}, "Config file"));
 
             command.Handler = CommandHandler.Create((Config config) =>
             {
@@ -36,7 +36,6 @@ namespace shtxt
             });
             
             command.Invoke(args);
-            Console.WriteLine("End");
         }
 
         static void Convert(Config config)
