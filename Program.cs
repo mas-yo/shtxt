@@ -68,23 +68,22 @@ namespace shtxt
                     var controlParser = new ControlParser() { CommentStartsWith = config.CommentStartsWith };
                     var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag, controlParser);
                     var info = loader.Load(sheet.GetRowDataEnumerable());
-                    WriteText(info, config);
+                    if (!info.IsValid) return;
+                    
+                    var versionList = new List<string>();
+                    if (File.Exists(config.VersionList.FullName))
+                    {
+                        versionList = File.ReadLines(config.VersionList.FullName).ToList();
+                    }
+                    var outputs = GetOutputRowEnumerable(info, versionList, config.CurrentVersion);
+                    WriteText(info.Header.Name, outputs, config);
                 });
             });
 
             Task.WaitAll(tasks.ToArray());
         }
-        static void WriteText(SheetInfo info, Config config)
+        static void WriteText(string name, IEnumerable<IReadOnlyCollection<string>> outputs, Config config)
         {
-            if (!info.IsValid)
-                return;
-
-            var versionList = new List<string>();
-            if (File.Exists(config.VersionList.FullName))
-            {
-                versionList = File.ReadLines(config.VersionList.FullName).ToList();
-            }
-
             var ext = "";
             var separator = "";
             switch (config.TextFormatType)
@@ -101,7 +100,7 @@ namespace shtxt
                     throw new Exception("unimplemented text format");
             }
 
-            using (var writer = new StreamWriter(Path.Combine(config.OutputDir, info.Header.Name + ext)))
+            using (var writer = new StreamWriter(Path.Combine(config.OutputDir, name + ext)))
             {
                 switch (config.NewLineType)
                 {
@@ -116,20 +115,15 @@ namespace shtxt
                         break;
                 }
 
-                WriteCsv(writer, info, separator, versionList, config.CurrentVersion);
+                var lines = outputs.Select(data => String.Join(separator, data));
+                foreach (var line in lines)
+                {
+                    writer.WriteLine(line);
+                }
             }
         }
         
-        static void WriteCsv(StreamWriter writer, SheetInfo info, string separator, IList<string> versionList, string currentVersion)
-        {
-            var lines = GetRowEnumerable(info, versionList, currentVersion).Select(data => String.Join(separator, data));
-            foreach (var line in lines)
-            {
-                writer.WriteLine(line);
-            }
-        }
-
-        static IEnumerable<IReadOnlyCollection<string>> GetRowEnumerable(SheetInfo info, IList<string> versionList, string currentVersion)
+        static IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info, IList<string> versionList, string currentVersion)
         {
             var columnInfos = info.GetEnumerableColumnInfo();
             var skipColumns = columnInfos
