@@ -66,6 +66,7 @@ namespace shtxt
                 {
                     (var name, var outputs) = Converter.Convert(sheet, config);
                     if (String.IsNullOrEmpty(name)) return;
+                    Console.WriteLine(name);
                     TextWriter.Write(name, outputs, config);
                 });
             });
