@@ -89,6 +89,8 @@ namespace shtxt
             while(rowEnumerator.MoveNext())
             {
                 var columns = rowEnumerator.Current;
+                if (columns.Count == 0) continue;
+                
                 string control = null;
                 
                 if (columns.ContainsKey(CONTROL_COLUMN))

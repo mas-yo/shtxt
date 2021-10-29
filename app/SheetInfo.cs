@@ -21,15 +21,26 @@ namespace shtxt
         public class HeaderInfo
         {
             public string Name { get; private set; }
-            public IReadOnlyCollection<Control> ColumnControls { get; private set; }
+
+            private List<Control> _columnControl;
+            public IReadOnlyCollection<Control> ColumnControls { get => _columnControl; }
             public IReadOnlyCollection<string> ColumnNames { get; private set; }
 
-            public HeaderInfo(string name, IReadOnlyCollection<Control> columnControls,
+            public HeaderInfo(string name, List<Control> columnControls,
                 IReadOnlyCollection<string> columnNames)
             {
                 Name = name;
-                ColumnControls = columnControls;
                 ColumnNames = columnNames;
+
+                _columnControl = columnControls;
+                if (_columnControl == null)
+                {
+                    _columnControl = ColumnNames.Select(_ => (Control)new None()).ToList();
+                }
+                else if (ColumnControls.Count < columnNames.Count)
+                {
+                    _columnControl.Add(new None());
+                }
             }
 
             public bool IsValid

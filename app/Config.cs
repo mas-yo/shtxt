@@ -66,6 +66,13 @@ namespace shtxt
 
                 return;
             }
+
+            if (key == "VersionList" && !String.IsNullOrEmpty(value))
+            {
+                VersionList = new FileInfo(value);
+                return;
+            }
+            
             var propertyInfo = this.GetType().GetProperty(key);
             if (propertyInfo == null) return;
             propertyInfo.SetValue(this, value);
