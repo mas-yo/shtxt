@@ -1,3 +1,34 @@
-OutputDir: ./Output
-InputFiles: /Users/myoshida/dev/shtxt/config.yml test1.xlsx excel
+
+# input files. can specify directory or file, multi files/directories can be set by separating with space character.
+InputFiles: excel
+
+# input file name pattern by regular expression
 InputPattern: \.xlsx
+
+# version list file. default: versions.txt
+VersionList: versions.txt
+
+# current version string. (no default value)
+CurrentVersion: v1.0.1
+
+# output directory
+OutputDir: ./Output
+
+# new line code of output text(cr, lf, crlf)
+NewLine: lf
+
+# output format(csv, tsv)
+TextFormat: tsv
+
+# string that indicates comment line
+CommentStartsWith: #
+
+# tag string in spread sheet for table name
+TableNameTag: [TableName]
+
+# tag string in spread sheet for column name
+ColumnNameTag: [ColumnName]
+
+# tag string in spread sheet for column control
+ColumnControlTag: [ColumnControl]
+
