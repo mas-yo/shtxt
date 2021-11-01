@@ -23,6 +23,7 @@ namespace shtxt
             command.Add(new Option<string>(new string[] {"-o", "--output-dir"}, "Output directory"));
             command.Add(new Option<string>(new string[] {"-n", "--newline"}, "Newline code(cr,lf,crlf)"));
             command.Add(new Option<string>(new string[] {"-f", "--text-format"}, "Output format(csv,tsv)"));
+            command.Add(new Option<string>(new string[] {"--output-column-name-tag"}, "Output column name tag"));
             command.Add(new Option<string>(new string[] {"--comment-starts-with"}, "String that indicates comment"));
             command.Add(new Option<string>(new string[] {"--table-name-tag"}, "Tag string for table name"));
             command.Add(new Option<string>(new string[] {"--column-name-tag"}, "Tag string for column name"));
@@ -65,8 +66,12 @@ namespace shtxt
                 return Task.Factory.StartNew(() =>
                 {
                     (var name, var outputs) = Converter.Convert(sheet, config);
-                    if (String.IsNullOrEmpty(name)) return;
-                    Console.WriteLine(name);
+                    if (String.IsNullOrEmpty(name))
+                    {
+                        Console.WriteLine($"{sheet.SheetName}: invalid format");
+                        return;
+                    }
+                    Console.WriteLine($"Convert: {name}");
                     TextWriter.Write(name, outputs, config);
                 });
             });

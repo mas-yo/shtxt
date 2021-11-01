@@ -1,6 +1,6 @@
 
 # input files. can specify directory or file, multi files/directories can be set by separating with space character.
-InputFiles: excel
+InputFiles: ".."
 
 # input file name pattern by regular expression
 InputPattern: \.xlsx
@@ -20,15 +20,18 @@ NewLine: lf
 # output format(csv, tsv)
 TextFormat: tsv
 
+# output tag string for column name
+OutputColumnNameTag: "##"
+
 # string that indicates comment line
-CommentStartsWith: #
+CommentStartsWith: "#"
 
 # tag string in spread sheet for table name
-TableNameTag: [TableName]
+TableNameTag: "[NAME]"
 
 # tag string in spread sheet for column name
-ColumnNameTag: [ColumnName]
+ColumnNameTag: "[COLUMN]"
 
 # tag string in spread sheet for column control
-ColumnControlTag: [ColumnControl]
+ColumnControlTag: "[CONTROL]"
 

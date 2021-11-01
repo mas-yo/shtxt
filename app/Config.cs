@@ -45,6 +45,8 @@ namespace shtxt
             get => Enum.Parse<TextFormatType>(TextFormat, true);
         }
 
+        public string OutputColumnNameTag { get; set; } = "";
+
         public string CommentStartsWith { get; set; } = "#";
         public string TableNameTag { get; set; } = "[NAME]";
         public string ColumnControlTag { get; set; } = "[CONTROL]";

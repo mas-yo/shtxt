@@ -29,6 +29,9 @@ namespace shtxt
             public HeaderInfo(string name, List<Control> columnControls,
                 IReadOnlyCollection<string> columnNames)
             {
+                if (String.IsNullOrEmpty(name)) return;
+                if (columnNames == null) return;
+                
                 Name = name;
                 ColumnNames = columnNames;
 

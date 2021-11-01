@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -22,10 +23,10 @@ namespace shtxt
                 versionList = File.ReadLines(config.VersionList.FullName).ToList();
             }
 
-            return (info.Header.Name, GetOutputRowEnumerable(info, versionList, config.CurrentVersion));
+            return (info.Header.Name, GetOutputRowEnumerable(info, versionList, config.CurrentVersion, config.OutputColumnNameTag));
         }
         
-        static IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info, IList<string> versionList, string currentVersion)
+        static IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info, IList<string> versionList, string currentVersion, string outputColumnNameTag)
         {
             var columnInfos = info.GetEnumerableColumnInfo();
             var skipColumns = columnInfos
@@ -34,12 +35,19 @@ namespace shtxt
                 .Select(i => i.idx)
                 .ToList();
 
-            yield return columnInfos
+            var columnNames = columnInfos
                 .Where((ci, idx) => !skipColumns.Contains(idx))
                 .Select(ci => ci.Name)
-                .ToList().AsReadOnly();
+                .ToList();
 
-            foreach (var row in info.Body)
+            if (!String.IsNullOrEmpty(outputColumnNameTag))
+            {
+                columnNames.Insert(0, outputColumnNameTag);
+            }
+
+            yield return columnNames.AsReadOnly();
+
+                foreach (var row in info.Body)
             {
                 if (!IsEnable(row.Control, currentVersion, versionList)) continue;
                 
