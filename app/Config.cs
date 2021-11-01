@@ -27,6 +27,7 @@ namespace shtxt
         public List<DirectoryInfo> InputFiles { get; set; }
         public string InputPattern { get; set; } = "";
 
+        public string ExcludeInputPattern { get; set; } = "";
         public FileInfo VersionList { get; set; } = new FileInfo("versions.txt");
         
         public string CurrentVersion { get; set; }

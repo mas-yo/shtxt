@@ -42,21 +42,22 @@ namespace shtxt
         static void Convert(Config config)
         {
             var regex = new Regex(config.InputPattern);
+            var excludeRegex = new Regex(config.ExcludeInputPattern);
             
             var tasks = config.InputFiles.SelectMany(info =>
             {
                 if ((info.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                 {
-                    return Directory.GetFiles(info.FullName, "*", SearchOption.AllDirectories).Where(path => regex.IsMatch(path));
+                    return Directory.GetFiles(info.FullName, "*", SearchOption.AllDirectories);
                 }
                 else
                 {
-                    if (regex.IsMatch(info.FullName))
-                    {
-                        return new string[] {info.FullName};
-                    }
-                    return new string[] {};
+                    return new string[] {info.FullName};
                 }
+            }).Where(path =>
+            {
+                var fileName = Path.GetFileName(path);
+                return regex.IsMatch(fileName) && !excludeRegex.IsMatch(fileName);
             }).SelectMany(path =>
             {
                 var book = WorkbookFactory.Create(path, password: null, readOnly: true);

@@ -3,7 +3,10 @@
 InputFiles: ".."
 
 # input file name pattern by regular expression
-InputPattern: \.xlsx
+InputPattern: \.xlsx$
+
+# exclude patten for input file
+ExcludeInputPattern: ^~
 
 # version list file. default: versions.txt
 VersionList: versions.txt
