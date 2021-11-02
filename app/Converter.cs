@@ -10,27 +10,35 @@ namespace shtxt
 {
     public class Converter
     {
-        public static (string, IEnumerable<IReadOnlyCollection<string>>) Convert(ISheet sheet, Config config)
+        private Config config;
+        private IList<string> versionList;
+
+        public Converter(Config config)
+        {
+            this.config = config;
+        }
+        
+        public (string, IEnumerable<IReadOnlyCollection<string>>) Convert(ISheet sheet)
         {
             var controlParser = new ControlParser() { CommentStartsWith = config.CommentStartsWith };
             var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag, controlParser);
             var info = loader.Load(sheet.GetRowDataEnumerable());
             if (!info.IsValid) return (null, null);
                 
-            var versionList = new List<string>();
+            versionList = new List<string>();
             if (File.Exists(config.VersionList.FullName))
             {
                 versionList = File.ReadLines(config.VersionList.FullName).ToList();
             }
 
-            return (info.Header.Name, GetOutputRowEnumerable(info, versionList, config.CurrentVersion, config.OutputColumnNameTag));
+            return (info.Header.Name, GetOutputRowEnumerable(info));
         }
         
-        static IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info, IList<string> versionList, string currentVersion, string outputColumnNameTag)
+        private IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info)
         {
             var columnInfos = info.GetEnumerableColumnInfo();
             var skipColumns = columnInfos
-                .Select((columnInfo, idx) => (idx, IsEnable(columnInfo.Control, currentVersion, versionList)))
+                .Select((columnInfo, idx) => (idx, IsEnable(columnInfo.Control)))
                 .Where(i => i.Item2 == false)
                 .Select(i => i.idx)
                 .ToList();
@@ -40,35 +48,48 @@ namespace shtxt
                 .Select(ci => ci.Name)
                 .ToList();
 
-            if (!String.IsNullOrEmpty(outputColumnNameTag))
+            if (config.IsOutputControlColumn)
             {
-                columnNames.Insert(0, outputColumnNameTag);
+                columnNames.Insert(0, config.OutputColumnNameTag);
             }
 
             yield return columnNames.AsReadOnly();
 
-                foreach (var row in info.Body)
+            foreach (var row in info.Body)
             {
-                if (!IsEnable(row.Control, currentVersion, versionList)) continue;
-                
-                yield return row.Data
+                if (!IsEnable(row.Control)) continue;
+
+                var list = row.Data
                     .Where((data, idx) => !skipColumns.Contains(idx))
-                    .ToList()
-                    .AsReadOnly();
+                    .ToList();
+                
+                if (config.IsOutputControlColumn)
+                {
+                    list.Insert(0, GetControlTag(row.Control));
+                }
+
+                yield return list.AsReadOnly();
             }
         }
         
-        static bool IsEnable(Control control, string currentVersion, IList<string> versionList)
+        private bool IsEnable(Control control)
         {
             switch (control)
             {
                 case None:
                     return true;
                 case Comment:
-                    return false;
+                    if (config.IsOutputControlColumn)
+                    {
+                        return true;
+                    }
+                    else
+                    {
+                        return false;
+                    }
                     
                 case Version(var comp, var version):
-                    var currentIndex = versionList.IndexOf(currentVersion);
+                    var currentIndex = versionList.IndexOf(config.CurrentVersion);
                     if (currentIndex < 0) return true;
                     var checkIndex = versionList.IndexOf(version);
                     switch (comp)
@@ -90,6 +111,16 @@ namespace shtxt
                     return true;
             }
             return true;
+        }
+
+        private string GetControlTag(Control control)
+        {
+            switch (control)
+            {
+                case Comment:
+                    return config.OutputCommentTag;
+            }
+            return "";
         }
 
 

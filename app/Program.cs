@@ -66,7 +66,8 @@ namespace shtxt
             {
                 return Task.Factory.StartNew(() =>
                 {
-                    (var name, var outputs) = Converter.Convert(sheet, config);
+                    var converter = new Converter(config);
+                    (var name, var outputs) = converter.Convert(sheet);
                     if (String.IsNullOrEmpty(name))
                     {
                         Console.WriteLine($"{sheet.SheetName}: invalid format");

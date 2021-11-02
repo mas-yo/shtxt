@@ -23,8 +23,14 @@ NewLine: lf
 # output format(csv, tsv)
 TextFormat: tsv
 
+# output control column (first column)
+OutputControlColumn: false
+
 # output tag string for column name
 OutputColumnNameTag: "##"
+
+# output tag string for comment
+OutputCommentTag: "#"
 
 # string that indicates comment line
 CommentStartsWith: "#"
