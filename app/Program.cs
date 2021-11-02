@@ -41,12 +41,23 @@ namespace shtxt
 
         static void Convert(Config config)
         {
+            if (!Directory.Exists(config.OutputDir))
+            {
+                Console.WriteLine($"Output directory [{config.OutputDir}] does not exist.");
+                return;
+            }
+            
             var regex = new Regex(config.InputPattern);
             var excludeRegex = new Regex(config.ExcludeInputPattern);
             
             var tasks = config.InputFiles.SelectMany(info =>
             {
-                if ((info.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
+                if ((!info.Exists))
+                {
+                    Console.WriteLine($"Input file/directory [{info.FullName}] does not exist.");
+                    return new string[]{};
+                }
+                else if ((info.Attributes & FileAttributes.Directory) == FileAttributes.Directory)
                 {
                     return Directory.GetFiles(info.FullName, "*", SearchOption.AllDirectories);
                 }
@@ -58,7 +69,7 @@ namespace shtxt
             {
                 var fileName = Path.GetFileName(path);
                 return regex.IsMatch(fileName) && !excludeRegex.IsMatch(fileName);
-            }).SelectMany(path =>
+            }).Distinct().SelectMany(path =>
             {
                 var book = WorkbookFactory.Create(path, password: null, readOnly: true);
                 return book.GetSheetEnumerable();
