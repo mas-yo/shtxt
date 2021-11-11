@@ -24,7 +24,7 @@ namespace shtxt
     }
     public class Config
     {
-        public List<DirectoryInfo> InputFiles { get; set; }
+        public List<FileSystemInfo> InputFiles { get; set; }
         public string InputPattern { get; set; } = "";
 
         public string ExcludeInputPattern { get; set; } = "";
@@ -66,12 +66,22 @@ namespace shtxt
         {
             if (key == "InputFiles")
             {
-                if (InputFiles == null) InputFiles = new List<DirectoryInfo>();
+                if (InputFiles == null) InputFiles = new List<FileSystemInfo>();
                 
                 var files = value.Split(" ");
                 foreach (var file in files)
                 {
-                    InputFiles.Add( new DirectoryInfo(file));
+                    FileSystemInfo dirInfo = new DirectoryInfo(file);
+                    if (dirInfo.Exists)
+                    {
+                        InputFiles.Add(dirInfo);
+                    }
+
+                    FileSystemInfo fileInfo = new FileInfo(file);
+                    if (fileInfo.Exists)
+                    {
+                        InputFiles.Add(fileInfo);
+                    }
                 }
 
                 return;
