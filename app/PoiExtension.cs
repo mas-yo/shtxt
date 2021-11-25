@@ -31,6 +31,9 @@ namespace shtxt
                         case CellType.String:
                             data.Add(cell.ColumnIndex, cell.StringCellValue);
                             break;
+                        case CellType.Boolean:
+                            data.Add(cell.ColumnIndex, cell.BooleanCellValue.ToString());
+                            break;
                         case CellType.Formula:
                             switch (cell.CachedFormulaResultType)
                             {
