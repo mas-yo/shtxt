@@ -83,7 +83,7 @@ namespace shtxt
             return new SheetInfo.HeaderInfo(tableName, controls, columnNames);
         }
 
-        private IReadOnlyList<SheetInfo.Row> LoadBody()
+        private IReadOnlyList<SheetInfo.Row> LoadBody(int columnCount)
         {
             var body = new List<SheetInfo.Row>();
             while(rowEnumerator.MoveNext())
@@ -98,7 +98,9 @@ namespace shtxt
                     control = columns[CONTROL_COLUMN];
                 }
 
-                body.Add(new SheetInfo.Row(controlParser.Parse(control), DictionaryToList(columns)));
+                var list = DictionaryToList(columns);
+                list.AddRange(Enumerable.Repeat("", columnCount - list.Count));
+                body.Add(new SheetInfo.Row(controlParser.Parse(control), list));
             }
 
             return body;
@@ -113,7 +115,7 @@ namespace shtxt
                 return new SheetInfo(header, null);
             }
 
-            var body = LoadBody();
+            var body = LoadBody(header.ColumnNames.Count);
             return new SheetInfo(header, body);
         }
     }
