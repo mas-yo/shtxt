@@ -102,32 +102,32 @@ namespace shtxt
         public void LoadFromFile()
         {
             var configFileList = new List<string>() {"config.yml","config.yaml", "Config.yml", "Config.yaml"};
-            string path = null;
-            if (ConfigFile != null && ConfigFile.Exists)
+            var paths = new List<string>();
+
+            foreach (var file in configFileList)
             {
-                path = ConfigFile.FullName;
-            }
-            else
-            {
-                foreach (var file in configFileList)
+                if (File.Exists(file))
                 {
-                    if (File.Exists(file))
-                    {
-                        path = file;
-                        break;
-                    }
+                    paths.Add(file);
+                    break;
                 }
             }
-
-            if (String.IsNullOrEmpty(path)) return;
             
-            using (var reader = new StreamReader(path, Encoding.UTF8))
+            if (ConfigFile != null && ConfigFile.Exists)
             {
-                var deserializer = new DeserializerBuilder().Build();
-                var dict = deserializer.Deserialize<Dictionary<string, string>>(reader.ReadToEnd());
-                foreach (var kv in dict)
+                paths.Add(ConfigFile.FullName);
+            }
+
+            foreach (var path in paths)
+            {
+                using (var reader = new StreamReader(path, Encoding.UTF8))
                 {
-                    SetByKeyValue(kv.Key, kv.Value);
+                    var deserializer = new DeserializerBuilder().Build();
+                    var dict = deserializer.Deserialize<Dictionary<string, string>>(reader.ReadToEnd());
+                    foreach (var kv in dict)
+                    {
+                        SetByKeyValue(kv.Key, kv.Value);
+                    }
                 }
             }
         }
