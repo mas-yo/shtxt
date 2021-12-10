@@ -22,7 +22,7 @@ namespace shtxt
         {
             var controlParser = new ControlParser() { CommentStartsWith = config.CommentStartsWith };
             var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag, controlParser);
-            var info = loader.Load(sheet.GetRowDataEnumerable());
+            var info = loader.Load(sheet.GetRowDataEnumerable(config.DateTimeFormat));
             if (!info.IsValid) return (null, null);
                 
             versionList = new List<string>();
