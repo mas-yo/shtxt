@@ -32,6 +32,8 @@ namespace shtxt
         
         public string CurrentVersion { get; set; }
         public string OutputDir { get; set; } = ".";
+
+        public string DateTimeFormat { get; set; } = "";
         public string NewLine { get; set; } = "LF";
 
         public NewLineType NewLineType

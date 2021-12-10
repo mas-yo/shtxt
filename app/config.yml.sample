@@ -17,6 +17,9 @@ CurrentVersion: v1.0.1
 # output directory
 OutputDir: ./Output
 
+# output date time format
+DateTimeFormat: yyyy/MM/dd HH:mm:ss zzz
+
 # new line code of output text(cr, lf, crlf)
 NewLine: lf
 
