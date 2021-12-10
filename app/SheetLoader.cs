@@ -99,7 +99,14 @@ namespace shtxt
                 }
 
                 var list = DictionaryToList(columns);
-                list.AddRange(Enumerable.Repeat("", columnCount - list.Count));
+                if (list.Count < columnCount)
+                {
+                    list.AddRange(Enumerable.Repeat("", columnCount - list.Count));
+                }
+                else if (list.Count > columnCount)
+                {
+                    list.RemoveRange(columnCount, list.Count - columnCount);
+                }
                 body.Add(new SheetInfo.Row(controlParser.Parse(control), list));
             }
 
