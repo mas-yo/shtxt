@@ -83,8 +83,11 @@ namespace shtxt
                 return regex.IsMatch(fileName) && !excludeRegex.IsMatch(fileName);
             }).Distinct().SelectMany(path =>
             {
-                var book = WorkbookFactory.Create(path, password: null, readOnly: true);
-                return book.GetSheetEnumerable();
+                using (var fs = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                {
+                    var book = WorkbookFactory.Create(fs, true);
+                    return book.GetSheetEnumerable();
+                }
             }).Select(sheet =>
             {
                 return Task.Factory.StartNew(() =>
