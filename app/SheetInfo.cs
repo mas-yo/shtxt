@@ -25,10 +25,13 @@ namespace shtxt
             private List<Control> _columnControl;
             public IReadOnlyCollection<Control> ColumnControls { get => _columnControl; }
             public IReadOnlyCollection<string> ColumnNames { get; private set; }
+            
+            public IReadOnlyCollection<string> ErrorMessages { get; private set; }
 
             public HeaderInfo(string name, List<Control> columnControls,
-                IReadOnlyCollection<string> columnNames)
+                IReadOnlyCollection<string> columnNames, IReadOnlyCollection<string> errorMessages)
             {
+                ErrorMessages = errorMessages;
                 if (String.IsNullOrEmpty(name)) return;
                 if (columnNames == null) return;
                 
@@ -46,16 +49,7 @@ namespace shtxt
                 }
             }
 
-            public bool IsValid
-            {
-                get
-                {
-                    if (String.IsNullOrWhiteSpace(Name)) return false;
-                    if (ColumnNames == null) return false;
-                    if (ColumnNames.Count == 0) return false;
-                    return true;
-                }
-            }
+            public bool IsValid => ErrorMessages == null || ErrorMessages.Count == 0;
         }
 
 
@@ -97,21 +91,6 @@ namespace shtxt
             int columnMax = Header.ColumnNames.Count;
             int bodyMax = Body.Max(r => r.Data.Count);
             return Math.Max(columnMax, bodyMax);
-        }
-
-        public bool IsValid
-        {
-            get
-            {
-                if (!Header.IsValid) 
-                    return false;
-                
-                if (Body == null)
-                    return false;
-                if (Body.Count == 0)
-                    return false;
-                return true;
-            }
         }
     }
 

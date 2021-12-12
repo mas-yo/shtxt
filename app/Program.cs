@@ -92,15 +92,25 @@ namespace shtxt
             {
                 return Task.Factory.StartNew(() =>
                 {
-                    var converter = new Converter(config);
-                    (var name, var outputs) = converter.Convert(sheet);
-                    if (String.IsNullOrEmpty(name))
+                    var controlParser = new ControlParser() { CommentStartsWith = config.CommentStartsWith };
+                    var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag, controlParser);
+                    var info = loader.Load(sheet.GetRowDataEnumerable(config.DateTimeFormat));
+
+                    if (!info.Header.IsValid)
                     {
-                        Console.WriteLine($"{sheet.SheetName}: invalid format");
+                        foreach (var msg in info.Header.ErrorMessages)
+                        {
+                            Console.WriteLine($"{sheet.SheetName}: {msg}");
+                        }
                         return;
                     }
-                    Console.WriteLine($"Convert: {name}");
-                    TextWriter.Write(name, outputs, config);
+                    var converter = new Converter(config);
+                    var outputs = converter.GetOutputRowEnumerable(info);
+                    Console.WriteLine($"Convert: {info.Header.Name}");
+                    if (outputs != null)
+                    {
+                        TextWriter.Write(info.Header.Name, outputs, config);
+                    }
                 });
             });
 
