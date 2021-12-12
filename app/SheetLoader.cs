@@ -80,7 +80,22 @@ namespace shtxt
 
             var controls = columnCommands != null ? columnCommands.Select(c => controlParser.Parse(c)).ToList() : null;
 
-            return new SheetInfo.HeaderInfo(tableName, controls, columnNames);
+            var errorMessages = new List<string>();
+            if (String.IsNullOrEmpty(tableName))
+            {
+                errorMessages.Add($"can not detect table name. {tableNameTag} may not exists, or table name not specified");
+            }
+
+            if (columnNames == null)
+            {
+                errorMessages.Add($"{columnNameTag} not exists");
+            }
+            else if (columnNames.Count <= 0)
+            {
+                errorMessages.Add($"column name not specified");
+            }
+
+            return new SheetInfo.HeaderInfo(tableName, controls, columnNames, errorMessages);
         }
 
         private IReadOnlyList<SheetInfo.Row> LoadBody(int columnCount)

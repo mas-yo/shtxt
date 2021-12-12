@@ -16,25 +16,14 @@ namespace shtxt
         public Converter(Config config)
         {
             this.config = config;
-        }
-        
-        public (string, IEnumerable<IReadOnlyCollection<string>>) Convert(ISheet sheet)
-        {
-            var controlParser = new ControlParser() { CommentStartsWith = config.CommentStartsWith };
-            var loader = new SheetLoader(config.TableNameTag, config.ColumnControlTag, config.ColumnNameTag, controlParser);
-            var info = loader.Load(sheet.GetRowDataEnumerable(config.DateTimeFormat));
-            if (!info.IsValid) return (null, null);
-                
             versionList = new List<string>();
             if (File.Exists(config.VersionList.FullName))
             {
                 versionList = File.ReadLines(config.VersionList.FullName).ToList();
             }
-
-            return (info.Header.Name, GetOutputRowEnumerable(info));
         }
         
-        private IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info)
+        public IEnumerable<IReadOnlyCollection<string>> GetOutputRowEnumerable(SheetInfo info)
         {
             var columnInfos = info.GetEnumerableColumnInfo();
             var skipColumns = columnInfos
