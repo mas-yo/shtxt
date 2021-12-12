@@ -53,8 +53,6 @@ namespace shtxt
                     if (String.IsNullOrWhiteSpace(Name)) return false;
                     if (ColumnNames == null) return false;
                     if (ColumnNames.Count == 0) return false;
-                    if (ColumnNames.Any(c => String.IsNullOrWhiteSpace(c)))
-                        return false;
                     return true;
                 }
             }
