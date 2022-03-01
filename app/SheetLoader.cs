@@ -104,6 +104,7 @@ namespace shtxt
             while(rowEnumerator.MoveNext())
             {
                 var columns = rowEnumerator.Current;
+                if (columns.Values.All(x => x == "")) continue;
                 if (columns.Count == 0) continue;
                 
                 string control = null;
