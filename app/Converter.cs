@@ -50,7 +50,7 @@ namespace shtxt
 
                 var list = row.Data
                     .Where((data, idx) => !skipColumns.Contains(idx))
-                    .Select(data => data.Replace("\n", "\\n"))
+                    .Select(data => data.Replace("\r\n", "\\n").Replace("\r", "\\n").Replace("\n", "\\n"))
                     .ToList();
                 
                 if (config.IsOutputControlColumn)
